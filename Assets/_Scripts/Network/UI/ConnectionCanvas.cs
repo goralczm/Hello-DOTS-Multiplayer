@@ -1,44 +1,21 @@
-using System.Collections;
-using System.Threading.Tasks;
-using Unity.Entities;
-using Unity.NetCode;
 using UnityEngine;
 
 public class ConnectionCanvas : MonoBehaviour
 {
     [SerializeField] private GameObject _connectionPanel;
 
-    private World _clientWorld;
-
-    private void Start()
+    private void OnEnable()
     {
-        foreach (World world in World.All)
-        {
-            if (world.IsClient())
-            {
-                _clientWorld = world;
-                break;
-            }
-        }
-
-        if (_clientWorld != null)
-            StartCoroutine(WaitUnitlConnected());
+        NetworkManager.s_OnClientConnected += HidePanel;
     }
 
-    private IEnumerator WaitUnitlConnected()
+    private void OnDisable()
     {
-        EntityManager entityManager = _clientWorld.EntityManager;
+        NetworkManager.s_OnClientConnected -= HidePanel;
+    }
 
-        while (true)
-        {
-            EntityQuery query = entityManager.CreateEntityQuery(typeof(NetworkId));
-            if (!query.IsEmpty)
-            {
-                _connectionPanel.SetActive(false);
-                yield break;
-            }
-
-            yield return null;
-        }
+    private void HidePanel()
+    {
+        _connectionPanel.SetActive(false);
     }
 }

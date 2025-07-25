@@ -1,6 +1,8 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using UnityEditor;
+using UnityEngine.Playables;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 partial struct PlayerStateSystem : ISystem
@@ -8,20 +10,25 @@ partial struct PlayerStateSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         foreach ((
-            RefRO<PhysicsVelocity> physicsVelocity,
-            RefRO<PlayerSettings> playerSettings,
             RefRW<PlayerState> playerState,
+            RefRO<PlayerSettings> playerSettings,
+            RefRO<PhysicsVelocity> physicsVelocity,
             Entity entity)
             in SystemAPI.Query<
-                RefRO<PhysicsVelocity>,
+                RefRW<PlayerState>,
                 RefRO<PlayerSettings>,
-                RefRW<PlayerState>>()
+                RefRO<PhysicsVelocity>>()
                 .WithEntityAccess())
         {
-            float speed = math.abs(math.length(physicsVelocity.ValueRO.Linear));
-            float normalizedSpeed = speed / playerSettings.ValueRO.SprintSpeed;
-            float lerpedSpeed = math.lerp(playerState.ValueRO.Speed, normalizedSpeed, SystemAPI.Time.DeltaTime * playerSettings.ValueRO.SpeedDamping);
-            playerState.ValueRW.Speed = lerpedSpeed;
+            UpdatePlayerSpeed(playerState, physicsVelocity, playerSettings.ValueRO.SprintSpeed, SystemAPI.Time.DeltaTime * playerSettings.ValueRO.SpeedDamping);
         }
+    }
+
+    private void UpdatePlayerSpeed(RefRW<PlayerState> playerState, RefRO<PhysicsVelocity> playerVelocity, float maxSpeed, float speedDamping)
+    {
+        float speed = math.abs(math.length(playerVelocity.ValueRO.Linear));
+        float normalizedSpeed = speed / maxSpeed;
+        float lerpedSpeed = math.lerp(playerState.ValueRO.Speed, normalizedSpeed, speedDamping);
+        playerState.ValueRW.Speed = lerpedSpeed;
     }
 }

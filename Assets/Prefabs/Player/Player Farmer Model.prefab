@@ -2758,7 +2758,7 @@ GameObject:
   - component: {fileID: 6962046434426751411}
   - component: {fileID: 6013684180179657380}
   m_Layer: 0
-  m_Name: PlayerFarmerModel
+  m_Name: Player Farmer Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
