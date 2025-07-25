@@ -8,7 +8,7 @@ public class GameBootstrap : ClientServerBootstrap
 {
     public override bool Initialize(string defaultWorldName)
     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR // For testing purposes, if wanting to connect to dedicated server inside Editor, remove the if.
         AutoConnectPort = 7979;
         return base.Initialize(defaultWorldName);
 #elif UNITY_SERVER
