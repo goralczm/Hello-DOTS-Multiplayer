@@ -19,7 +19,8 @@ partial struct PlayerInputSystem : ISystem
     {
         foreach (
             RefRW<PlayerInput> playerInput
-            in SystemAPI.Query<RefRW<PlayerInput>>()
+            in SystemAPI.Query<
+                RefRW<PlayerInput>>()
             .WithAll<GhostOwnerIsLocal>())
         {
             float3 inputVector = new float3();
