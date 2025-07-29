@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Authentication;
@@ -6,20 +7,21 @@ using Unity.Services.Matchmaker;
 using Unity.Services.Matchmaker.Models;
 using UnityEngine;
 
-public class MatchFinder : MonoBehaviour
+public class MatchmakingHandler : MonoBehaviour
 {
+    public static event Action s_OnMatchRequested;
+    public static event Action<string> s_OnMatchStatusChanged;
+    public static event Action<bool> s_OnMatchRequestEnded;
+    
+    [Header("References")]
     [SerializeField] private NetworkManager _networkManager;
-    [SerializeField] private TextMeshProUGUI _connectionStateText;
-    [SerializeField] private GameObject _cancelButton;
-    [SerializeField] private GameObject _findMatchButton;
 
     private const string DefaultQueue = "Casual";
     private const float PollTicketTimerMax = 1.1f;
 
     private CreateTicketResponse _createTicketResponse;
     private float _pollTicketTimer;
-
-
+    
     private void Update()
     {
         if (_createTicketResponse != null)
@@ -34,17 +36,18 @@ public class MatchFinder : MonoBehaviour
         }
     }
 
-    public async void FindMatch()
+    public async void StartMatchmaking()
     {
         if (_createTicketResponse != null) return;
 
-        _createTicketResponse = await MatchmakerService.Instance.CreateTicketAsync(new List<Unity.Services.Matchmaker.Models.Player>
+        _createTicketResponse = await MatchmakerService.Instance.CreateTicketAsync(new List<Player>
         {
-            new Unity.Services.Matchmaker.Models.Player(AuthenticationService.Instance.PlayerId)
+            new (AuthenticationService.Instance.PlayerId)
         }, new CreateTicketOptions { QueueName = DefaultQueue });
-
-        _connectionStateText.SetText("Created ticket");
-        _cancelButton.SetActive(true);
+        
+        s_OnMatchRequested?.Invoke();
+        s_OnMatchStatusChanged?.Invoke("Starting matchmaking...");
+        
         _pollTicketTimer = PollTicketTimerMax;
     }
 
@@ -54,7 +57,7 @@ public class MatchFinder : MonoBehaviour
 
         if (ticketStatusResponse == null)
         {
-            _connectionStateText.SetText("Waiting for response...");
+            s_OnMatchStatusChanged?.Invoke("Waiting for response...");
             return;
         }
 
@@ -65,39 +68,41 @@ public class MatchFinder : MonoBehaviour
             switch (multiplayAssignment.Status)
             {
                 case MultiplayAssignment.StatusOptions.Found:
-                    CancelFinder();
-                    _connectionStateText.SetText("Connecting...");
+                    CancelMatchFinding();
+                    s_OnMatchStatusChanged?.Invoke("Connecting...");
                     _networkManager.SetIPAddress(multiplayAssignment.Ip);
                     _networkManager.SetPort(multiplayAssignment.Port.ToString());
                     _networkManager.ConnectWithInternal();
+                    s_OnMatchRequestEnded?.Invoke(true);
                     break;
                 case MultiplayAssignment.StatusOptions.InProgress:
-                    _connectionStateText.SetText($"Waiting for other players...");
+                    s_OnMatchStatusChanged?.Invoke("Waiting for other players...");
                     break;
                 case MultiplayAssignment.StatusOptions.Failed:
-                    CancelFinder();
-                    _connectionStateText.SetText("Failed");
+                    CancelMatchFinding();
+                    s_OnMatchStatusChanged?.Invoke("Failed to find matching servers");
                     break;
                 case MultiplayAssignment.StatusOptions.Timeout:
-                    CancelFinder();
-                    _connectionStateText.SetText("Timeout");
+                    CancelMatchFinding();
+                    s_OnMatchStatusChanged?.Invoke("Connection timeout");
                     break;
             }
         }
     }
 
-    public async void CancelFinder()
+    public async void CancelMatchFinding()
     {
         if (_createTicketResponse != null)
         {
+            s_OnMatchStatusChanged?.Invoke("Matchmaking canceled");
+            s_OnMatchRequestEnded?.Invoke(false);
             await MatchmakerService.Instance.DeleteTicketAsync(_createTicketResponse.Id);
             _createTicketResponse = null;
-            _cancelButton.SetActive(false);
         }
     }
 
     private async void OnDisable()
     {
-        await Task.Run(delegate { CancelFinder(); });
+        await Task.Run(delegate { CancelMatchFinding(); });
     }
 }

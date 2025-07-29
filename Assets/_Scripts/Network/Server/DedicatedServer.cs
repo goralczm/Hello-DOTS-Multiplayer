@@ -1,33 +1,57 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Unity.Services.Matchmaker;
 using Unity.Services.Matchmaker.Models;
+using UnityEngine;
 #if UNITY_SERVER
 using Unity.Services.Multiplay;
 #endif
-using UnityEngine;
 
 public class DedicatedServer : MonoBehaviour
 {
     [SerializeField] private NetworkManager _networkManager;
-
+    
+#if UNITY_SERVER
     private const float BackfillTickTimerMax = 1.1f;
 
-#if UNITY_SERVER
+    private List<int> _connectedClients = new();
     private IServerQueryHandler _serverQueryHandler;
     private MatchmakingResults _matchmakingResults;
-#endif
-
     private string _backfillTicketId;
     private float _backfillTickTimer;
+    
+    public int ClientsCount => _connectedClients.Count;
+    public bool HasAvailableSlots => ClientsCount < 5;
+    public List<int> ConnectedClients => _connectedClients;
+
+    private void OnEnable()
+    {
+        NetworkEvents.s_OnClientConnected += AddClient;
+        NetworkEvents.s_OnClientDisconnected += RemoveClient;
+        NetworkEvents.s_OnClientConnected += UpdateBackfillTicket;
+        NetworkEvents.s_OnClientDisconnected += UpdateBackfillTicket;
+    }
+
+    private void OnDisable()
+    {
+        NetworkEvents.s_OnClientConnected -= AddClient;
+        NetworkEvents.s_OnClientDisconnected -= RemoveClient;
+        NetworkEvents.s_OnClientConnected -= UpdateBackfillTicket;
+        NetworkEvents.s_OnClientDisconnected -= UpdateBackfillTicket;
+    }
+
+    private void AddClient(int clientId)
+    {
+        _connectedClients.Add(clientId);
+    }
+
+    private void RemoveClient(int clientId)
+    {
+        _connectedClients.Remove(clientId);
+    }
 
     private async void Start()
     {
-#if UNITY_SERVER
         MultiplayEventCallbacks multiplayEventCallbacks = new MultiplayEventCallbacks();
         multiplayEventCallbacks.Allocate += MultiplayEventCallbacks_Allocate;
         multiplayEventCallbacks.Deallocate += MultiplayEventCallbacks_Deallocate;
@@ -40,29 +64,13 @@ public class DedicatedServer : MonoBehaviour
         var serverConfig = MultiplayService.Instance.ServerConfig;
         if (serverConfig.AllocationId != "")
             MultiplayEventCallbacks_Allocate(new MultiplayAllocation("", serverConfig.ServerId, serverConfig.AllocationId));
-#endif
     }
-
-#if UNITY_SERVER
-    private void OnEnable()
-    {
-        NetworkEvents.s_OnClientConnected += UpdateBackfillTicket;
-        NetworkEvents.s_OnClientDisconnected += UpdateBackfillTicket;
-    }
-
-    private void OnDisable()
-    {
-        NetworkEvents.s_OnClientConnected -= UpdateBackfillTicket;
-        NetworkEvents.s_OnClientDisconnected -= UpdateBackfillTicket;
-    }
-#endif
 
     private void Update()
     {
-#if UNITY_SERVER
         if (_serverQueryHandler != null)
         {
-            _serverQueryHandler.CurrentPlayers = (ushort)_networkManager.ClientsCount;
+            _serverQueryHandler.CurrentPlayers = (ushort)ClientsCount;
             _serverQueryHandler.UpdateServerCheck();
         }
 
@@ -76,10 +84,8 @@ public class DedicatedServer : MonoBehaviour
                 ApproveBackfillTicket();
             }
         }
-#endif
     }
 
-#if UNITY_SERVER
     private void MultiplayEventCallbacks_Allocate(MultiplayAllocation obj)
     {
         var serverConfig = MultiplayService.Instance.ServerConfig;
@@ -101,7 +107,7 @@ public class DedicatedServer : MonoBehaviour
 
     private async void ApproveBackfillTicket()
     {
-        if (!_networkManager.HasAvailableSlots) return;
+        if (!HasAvailableSlots) return;
 
         BackfillTicket ticket = await MatchmakerService.Instance.ApproveBackfillTicketAsync(_backfillTicketId);
         _backfillTicketId = ticket.Id;
@@ -109,14 +115,14 @@ public class DedicatedServer : MonoBehaviour
 
     private async void UpdateBackfillTicket(int _)
     {
-        if (!_networkManager.HasAvailableSlots ||
+        if (!HasAvailableSlots ||
             _matchmakingResults == null ||
             _backfillTicketId == "")
             return;
 
         List<Unity.Services.Matchmaker.Models.Player> playerList = new();
 
-        foreach (int clientId in _networkManager.ConnectedCliens)
+        foreach (int clientId in ConnectedClients)
             playerList.Add(new Unity.Services.Matchmaker.Models.Player(clientId.ToString()));
 
         Team teamToCopy = _matchmakingResults.MatchProperties.Teams[0];

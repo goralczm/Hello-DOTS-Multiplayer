@@ -285,9 +285,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _networkManager: {fileID: 1290642544}
-  _connectionStateText: {fileID: 19651749}
-  _cancelButton: {fileID: 1507833040}
-  _findMatchButton: {fileID: 862390076}
 --- !u!4 &158613268
 Transform:
   m_ObjectHideFlags: 0
@@ -1590,7 +1587,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 158613267}
         m_TargetAssemblyTypeName: MatchFinder, Assembly-CSharp
-        m_MethodName: FindMatch
+        m_MethodName: StartMatchmaking
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2550,7 +2547,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 158613267}
         m_TargetAssemblyTypeName: MatchFinder, Assembly-CSharp
-        m_MethodName: CancelFinder
+        m_MethodName: CancelMatchFinding
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2611,8 +2608,9 @@ GameObject:
   - component: {fileID: 1606456070}
   - component: {fileID: 1606456069}
   - component: {fileID: 1606456073}
+  - component: {fileID: 1606456074}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Connection Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2715,9 +2713,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _connectionPanel: {fileID: 616445940}
-  _cancelButton: {fileID: 0}
-  _connectButton: {fileID: 1422512821}
   _connectionInfoText: {fileID: 1779613990}
+--- !u!114 &1606456074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606456068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15efd0b3991241de81ec5c8a04ce02e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _matchStatusText: {fileID: 19651749}
+  _cancelMatchmakingButton: {fileID: 1507833040}
+  _startMatchmakingButton: {fileID: 862390076}
 --- !u!1 &1775196341
 GameObject:
   m_ObjectHideFlags: 0

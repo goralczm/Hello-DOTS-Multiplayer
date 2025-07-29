@@ -10,25 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 15003, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: New Linux Server Profile
+  m_Name: Windows Client
   m_EditorClassIdentifier: 
   m_AssetVersion: 1
-  m_BuildTarget: 24
-  m_Subtarget: 1
-  m_PlatformId: 91d938b35f6f4798811e41f2acf9377f
+  m_BuildTarget: 19
+  m_Subtarget: 2
+  m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
-    rid: 2532562826863837185
+    rid: 2532562825192931329
   m_OverrideGlobalSceneList: 0
   m_Scenes: []
-  m_ScriptingDefines:
-  - UNITY_SERVER
+  m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []
   references:
     version: 2
     RefIds:
-    - rid: 2532562826863837185
-      type: {class: LinuxPlatformSettings, ns: UnityEditor.LinuxStandalone, asm: UnityEditor.LinuxStandalone.Extensions}
+    - rid: 2532562825192931329
+      type: {class: WindowsPlatformSettings, ns: UnityEditor.WindowsStandalone, asm: UnityEditor.WindowsStandalone.Extensions}
       data:
         m_Development: 0
         m_ConnectProfiler: 0
@@ -41,3 +40,9 @@ MonoBehaviour:
         m_ExplicitArrayBoundsChecks: 0
         m_CompressionType: 0
         m_InstallInBuildFolder: 0
+        m_WindowsBuildAndRunDeployTarget: 0
+        m_Architecture: 0
+        m_CreateSolution: 0
+        m_CopyPDBFiles: 0
+        m_WindowsDevicePortalAddress: 
+        m_WindowsDevicePortalUsername: 

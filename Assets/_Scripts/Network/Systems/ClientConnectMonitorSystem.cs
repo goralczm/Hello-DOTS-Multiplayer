@@ -1,6 +1,5 @@
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 
 public struct ConnectionHandledTag : IComponentData
 {
@@ -28,7 +27,6 @@ partial struct ClientConnectMonitorSystem : ISystem
                 )
         {
             NetworkEvents.s_OnClientConnected?.Invoke(networkId.ValueRO.Value);
-            Debug.Log($"Client connected: [{networkId.ValueRO.Value}]");
             ecb.AddComponent(entity, typeof(ConnectionHandledTag));
             ecb.AddComponent(entity, typeof(ConnectionState));
         }

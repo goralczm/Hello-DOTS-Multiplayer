@@ -1,8 +1,4 @@
-using NUnit.Framework;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Networking.Transport;
@@ -13,50 +9,19 @@ using UnityEngine;
 public class NetworkManager : MonoBehaviour
 {
     private World _clientWorld;
-    private World _serverWorld;
     private Entity _connectionRequest;
     private string _ipAddress;
     private ushort _port;
-
-    private List<int> _connectedClients = new();
-
-    public int ClientsCount => _connectedClients.Count;
-
-    public bool HasAvailableSlots => ClientsCount < 5;
-    public List<int> ConnectedCliens => _connectedClients;
-
-    private void OnEnable()
-    {
-        NetworkEvents.s_OnClientConnected += AddClient;
-        NetworkEvents.s_OnClientDisconnected += RemoveClient;
-    }
-
-    private void OnDisable()
-    {
-        NetworkEvents.s_OnClientConnected -= AddClient;
-        NetworkEvents.s_OnClientDisconnected -= RemoveClient;
-    }
-
-    private void AddClient(int clientId)
-    {
-        _connectedClients.Add(clientId);
-    }
-
-    private void RemoveClient(int clientId)
-    {
-        _connectedClients.Remove(clientId);
-    }
 
     private async void Awake()
     {
         InitializationOptions options = new InitializationOptions();
 
 #if !UNITY_SERVER
+        // Used for testing multiple clients on the same machine
         options.SetProfile($"Foo_{UnityEngine.Random.Range(-10000, 10000)}");
 #endif
-
         await UnityServices.InitializeAsync(options);
-
 #if !UNITY_SERVER
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
 #endif
@@ -65,8 +30,6 @@ public class NetworkManager : MonoBehaviour
         {
             if (world.IsClient())
                 _clientWorld = world;
-            else if (world.IsServer())
-                _serverWorld = world;
         }
 
         if (_clientWorld != null)
@@ -82,7 +45,7 @@ public class NetworkManager : MonoBehaviour
             EntityQuery query = entityManager.CreateEntityQuery(typeof(NetworkId));
             if (!query.IsEmpty)
             {
-                NetworkEvents.s_OnLocalClientConnected?.Invoke(this, new NetworkEvents.LocalClientConnectedEventArgs
+                NetworkEvents.s_OnClientConnectedLocal?.Invoke(this, new ClientConnectedLocalEventArgs
                 {
                     IPv4 = _ipAddress,
                     Port = _port,

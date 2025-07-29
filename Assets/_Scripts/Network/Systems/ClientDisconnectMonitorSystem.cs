@@ -1,8 +1,5 @@
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 
 public struct DisconnectHandledTag : IComponentData
 {
@@ -29,10 +26,8 @@ partial struct ClientDisconnectMonitorSystem : ISystem
         {
             if (connectionState.ValueRO.CurrentState != ConnectionState.State.Disconnected)
                 continue;
-
-            Debug.Log($"Client disconnected: {connectionState.ValueRO.NetworkId}");
+            
             NetworkEvents.s_OnClientDisconnected?.Invoke(connectionState.ValueRO.NetworkId);
-
             ecb.AddComponent(entity, typeof(DisconnectHandledTag));
         }
 
