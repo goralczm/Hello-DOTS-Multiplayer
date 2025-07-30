@@ -10,6 +10,7 @@
 - **Matchmaking**
     - W ramach rozbudowania projektu zdecydowałem się zaimplementować system Matchmakingu.
     - Użyłem do tego serwisu `Matchmaker` do tworzenia kolejek, które po spełnieniu wymagań alokują nowy dedykowany serwer, przekazując jego parametry do graczy, w celu ich połączenia.
+    - Matchmaker alokuje serwer dopiero kiedy co najmniej dwóch graczy znajduje się w kolejce lub jeden gracz czeka co najmniej 30 sekund.
     ![Matchmaker](matchmaking.gif)
 - **Backfill**
     - Dodatkowo dodałem osbługę tzw. `Backfill`, czyli możliwość dołączenia do serwera za pomocą Matchmakera nawet po rozpoczęciu rozgrywki.
@@ -38,6 +39,7 @@
 - Pobrać `Client.zip`
 - Wypakować
 - Otworzyć `DOTS-Multiplayer.exe`
+- Połączyć się np. za pomocą wyszukiwania meczu -> Przycisk `Find Match` (Matchmaker alokuje serwer dopiero kiedy co najmniej dwóch graczy znajduje się w kolejce lub jeden gracz czeka co najmniej 30 sekund.)
 
 ## Specyfikacja
 - Unity 6000.0.51f1
