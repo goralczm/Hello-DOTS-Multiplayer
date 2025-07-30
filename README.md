@@ -33,6 +33,12 @@
 - Ostatnim już krokiem było dodanie matchmakingu przy użyciu serwisu `Matchmaker` ustawionego wraz z `Multiplay Hosting`.
 - Po stworzeniu projektu, refaktoryzowałem nazwy zmiennych oraz wydzielałem logikę na mniejsze funkcje tam gdzie było to potrzebne.
 
+## Instalacja
+- Przejść do panelu **Releases**
+- Pobrać `Client.zip`
+- Wypakować
+- Otworzyć `DOTS-Multiplayer.exe`
+
 ## Specyfikacja
 - Unity 6000.0.51f1
 - Entities 1.3.14
