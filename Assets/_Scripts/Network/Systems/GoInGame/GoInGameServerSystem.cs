@@ -1,22 +1,20 @@
-using System.Linq;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using UnityEngine.Rendering.UI;
 
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 partial struct GoInGameServerSystem : ISystem
 {
-    private int LastNetworkConnectionsCount;
-
+    [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<EntitiesReferences>();
         state.RequireForUpdate<NetworkId>();
     }
 
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         EntityCommandBuffer entityCommandBuffer = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
@@ -54,24 +52,6 @@ partial struct GoInGameServerSystem : ISystem
 
             entityCommandBuffer.DestroyEntity(entity);
         }
-
-        /*foreach ((
-            RefRO<NetworkStreamConnection> networkStreamConnection,
-            Entity entity
-            )
-            in SystemAPI.Query<
-                RefRO<NetworkStreamConnection>
-                >()
-                .WithNone<ConnectionHandledTag>()
-                .WithEntityAccess()
-                )
-        {
-            if (networkStreamConnection.ValueRO.CurrentState != ConnectionState.State.Connected)
-                continue;
-
-            entityCommandBuffer.AddComponent(entity, typeof(ConnectionHandledTag));
-            NetworkEvents.s_OnClientConnected?.Invoke(null, new NetworkEvents.OnClientConnectedEventArgs());
-        }*/
 
         entityCommandBuffer.Playback(state.EntityManager);
         entityCommandBuffer.Dispose();

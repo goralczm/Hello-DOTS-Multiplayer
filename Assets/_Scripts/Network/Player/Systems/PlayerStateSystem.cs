@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -7,6 +8,7 @@ using UnityEngine.Playables;
 [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
 partial struct PlayerStateSystem : ISystem
 {
+    [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
         foreach ((
